@@ -1,5 +1,6 @@
 from tkinter import * # Inicio da aula 01
 from tkinter import ttk
+import sqlite3
 
 root = Tk()
 
@@ -9,7 +10,30 @@ class Funcs(): # Inicio da aula 07
         self.entry_nomeCliente.delete(0,END)
         self.entry_telefone.delete(0,END)
         self.entry_cidade.delete(0,END)
-
+    
+    def connect_db(self): # Inicio da aula 08
+        self.conn = sqlite3.connect("clientes.db")
+        self.cursor = self.conn.cursor()
+        print("conectando ao banco de dados")
+    
+    def disconnect_db(self):
+        self.conn.close()
+        print("Banco de dados desconectado")
+    
+    def montar_Tabela(self):
+        self.connect_db()
+        # Criação da tabela
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS clientes (
+                cod INTEGER PRIMARY KEY,
+                nome_cliente CHAR(40) NOT NULL,
+                telefone INTEGER(20),
+                cidade CHAR(40)
+                );
+            """)
+        self.conn.commit(); print("Banco de dados criado")
+        self.disconnect_db()
+    
 class App(Funcs):
     def __init__(self) -> None:
         self.root = root
@@ -17,8 +41,8 @@ class App(Funcs):
         self.frames_tela()
         self.widgets_frame1()
         self.lista_frame2()
+        self.montar_Tabela()
         root.mainloop()
-    
     
     def tela(self):
         self.root.title("Cadastro de Clientes")
@@ -26,7 +50,6 @@ class App(Funcs):
         self.root.geometry("700x500")
         self.root.maxsize(width=900, height=700)
         self.root.minsize(width=550, height=300)
-    
     
     def frames_tela(self): # Inicio da aula 02
         self.frame_1 = Frame(
@@ -41,7 +64,6 @@ class App(Funcs):
             highlightbackground='#759de6', highlightthickness=1.8
         )
         self.frame_2.place(relx=0.02, rely=0.5, relwidth=0.96, relheight=0.46)
-    
     
     def widgets_frame1(self): # Inicio da aula 03 // Inicio da aula 05 (estilização de widgets)
         # Botão de limpar.
@@ -102,7 +124,6 @@ class App(Funcs):
         
         self.entry_cidade = Entry(self.frame_1)
         self.entry_cidade.place(relx=0.5,rely=0.75, relwidth=0.42)
-    
     
     def lista_frame2(self): # Inicio da aula 6
         # Criação das colunas
