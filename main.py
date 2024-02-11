@@ -12,7 +12,7 @@ class Funcs(): # Inicio da aula 07
         self.entry_cidade.delete(0,END)
     
     def connect_db(self): # Inicio da aula 08
-        self.conn = sqlite3.connect("clientes.db")
+        self.conn = sqlite3.connect("clientes.sqlite3")
         self.cursor = self.conn.cursor()
         print("conectando ao banco de dados")
     
