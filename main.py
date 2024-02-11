@@ -1,4 +1,4 @@
-from tkinter import * # Inicio da aula 01
+from tkinter import *
 from tkinter import ttk
 import sqlite3
 
@@ -34,7 +34,7 @@ class Funcs(): # Inicio da aula 07
         self.conn.commit(); print("Banco de dados criado")
         self.disconnect_db()
     
-class App(Funcs):
+class App(Funcs):# Inicio da aula 01
     def __init__(self) -> None:
         self.root = root
         self.tela()
