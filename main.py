@@ -7,18 +7,18 @@ root = Tk()
 class Funcs(): # Inicio da aula 07
     def limpa_tela(self):
         self.entry_codigo.delete(0,END)
-        self.entry_nomeCliente.delete(0,END)
+        self.entry_nome.delete(0,END)
         self.entry_telefone.delete(0,END)
         self.entry_cidade.delete(0,END)
     
     def connect_db(self): # Inicio da aula 08
         self.conn = sqlite3.connect("clientes.sqlite3")
         self.cursor = self.conn.cursor()
-        print("conectando ao banco de dados")
+        # print("conectando ao banco de dados")
     
     def disconnect_db(self):
         self.conn.close()
-        print("Banco de dados desconectado")
+        # print("Banco de dados desconectado")
     
     def montar_Tabela(self):
         self.connect_db()
@@ -31,9 +31,68 @@ class Funcs(): # Inicio da aula 07
                 cidade CHAR(40)
                 );
             """)
-        self.conn.commit(); print("Banco de dados criado")
+        self.conn.commit() #; print("Banco de dados criado")
         self.disconnect_db()
     
+    def variaveis(self):
+        self.codigo = self.entry_codigo.get()
+        self.nome = self.entry_nome.get()
+        self.telefone = self.entry_telefone.get()
+        self.cidade = self.entry_cidade.get()
+    
+    def add_client(self): # Inicio da aula 09
+        self.variaveis()
+        
+        self.connect_db()
+        self.cursor.execute("""
+            INSERT INTO clientes(nome_cliente, telefone,cidade)
+                VALUES (?,?,?)
+            """, (self.nome, self.telefone, self.cidade))
+        self.conn.commit()
+        self.disconnect_db()
+        
+        self.select_lista()
+        self.limpa_tela()
+    
+    def select_lista(self):
+        self.lista_clientes.delete(*self.lista_clientes.get_children())
+        
+        self.connect_db()
+        lista = self.cursor.execute("""
+                SELECT cod, nome_cliente, telefone, cidade FROM clientes
+                ORDER BY nome_cliente ASC;
+            """)
+        
+        for i in lista:
+            self.lista_clientes.insert("", END, values=i)
+        
+        self.disconnect_db()
+    
+    def OnDoubleClik(self,event): # Inicio da aula 10
+        self.limpa_tela()
+        self.lista_clientes.selection()
+        
+        for n in self.lista_clientes.selection():
+            col1, col2, col3, col4 = self.lista_clientes.item(n, 'values')
+            
+            self.entry_codigo.insert(END,col1)
+            self.entry_nome.insert(END,col2)
+            self.entry_telefone.insert(END,col3)
+            self.entry_cidade.insert(END,col4)
+    
+    def del_client (self):
+        self.variaveis()
+        self.connect_db()
+        
+        self.cursor.execute("""
+                DELETE FROM clientes WHERE cod = ?
+            """, (self.codigo))
+        self.conn.commit()
+        
+        self.disconnect_db()
+        self.limpa_tela()
+        self.select_lista()
+
 class App(Funcs):# Inicio da aula 01
     def __init__(self) -> None:
         self.root = root
@@ -42,6 +101,7 @@ class App(Funcs):# Inicio da aula 01
         self.widgets_frame1()
         self.lista_frame2()
         self.montar_Tabela()
+        self.select_lista()
         root.mainloop()
     
     def tela(self):
@@ -79,7 +139,8 @@ class App(Funcs):# Inicio da aula 01
         
         # Botão Novo.
         self.bt_novo = Button(self.frame_1, text='Novo', bg='#2fabe9',
-                                bd=2, fg='white', font=('verdana',8,'bold'))
+                                bd=2, fg='white', font=('verdana',8,'bold'),
+                                    command=self.add_client)
         self.bt_novo.place(relx=0.6, rely=0.1, relwidth=0.1, relheight=0.169)
         
         # Botão de Alterar.
@@ -89,7 +150,8 @@ class App(Funcs):# Inicio da aula 01
         
         # Botão de Apagar.
         self.bt_apagar = Button(self.frame_1, text='Apagar', bg='#2fabe9',
-                                bd=2, fg='white', font=('verdana',8,'bold'))
+                                bd=2, fg='white', font=('verdana',8,'bold'),
+                                command=self.del_client)
         self.bt_apagar.place(relx=0.82, rely=0.1, relwidth=0.1, relheight=0.169)
         
         # Inicio da aula 04
@@ -106,8 +168,8 @@ class App(Funcs):# Inicio da aula 01
                                     fg='#2fabe9',font=('verdana',8,'bold'))
         self.lb_nomeCliente.place(relx=0.06,rely=0.3)
         
-        self.entry_nomeCliente = Entry(self.frame_1)
-        self.entry_nomeCliente.place(relx=0.063,rely=0.45, relwidth=0.86)
+        self.entry_nome = Entry(self.frame_1)
+        self.entry_nome.place(relx=0.063,rely=0.45, relwidth=0.86)
         
         # Criação da label e entry do telefone
         self.lb_telefone = Label(self.frame_1, text='Telefone', bg='#dfe3ee',
@@ -151,5 +213,7 @@ class App(Funcs):# Inicio da aula 01
         self.scrol_lista = Scrollbar(self.frame_2, orient='vertical')
         self.lista_clientes.configure(yscroll=self.scrol_lista.set)
         self.scrol_lista.place(relx=0.96, rely=0.05, relwidth=0.03, relheight=0.85)
+        
+        self.lista_clientes.bind("<Double-1>", self.OnDoubleClik)
 
 App()
