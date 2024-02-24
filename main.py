@@ -14,13 +14,13 @@ class Funcs(): # Inicio da aula 07
     def connect_db(self): # Inicio da aula 08
         self.conn = sqlite3.connect("clientes.sqlite3")
         self.cursor = self.conn.cursor()
-        # print("conectando ao banco de dados")
+        print("conectando ao banco de dados")
     
     def disconnect_db(self):
         self.conn.close()
-        # print("Banco de dados desconectado")
+        print("Banco de dados desconectado")
     
-    def montar_Tabela(self):
+    def create_table(self):
         self.connect_db()
         # Criação da tabela
         self.cursor.execute("""
@@ -31,12 +31,12 @@ class Funcs(): # Inicio da aula 07
                 cidade CHAR(40)
                 );
             """)
-        self.conn.commit() #; print("Banco de dados criado")
+        self.conn.commit(); print("Banco de dados criado")
         self.disconnect_db()
     
     def variaveis(self):
         self.codigo = self.entry_codigo.get()
-        self.nome = self.entry_nome.get()
+        self.nome_cliente = self.entry_nome.get()
         self.telefone = self.entry_telefone.get()
         self.cidade = self.entry_cidade.get()
     
@@ -46,8 +46,8 @@ class Funcs(): # Inicio da aula 07
         self.connect_db()
         self.cursor.execute("""
             INSERT INTO clientes(nome_cliente, telefone,cidade)
-                VALUES (?,?,?)
-            """, (self.nome, self.telefone, self.cidade))
+                VALUES (?,?,?);
+            """, (self.nome_cliente, self.telefone, self.cidade))
         self.conn.commit()
         self.disconnect_db()
         
@@ -92,7 +92,31 @@ class Funcs(): # Inicio da aula 07
         self.disconnect_db()
         self.limpa_tela()
         self.select_lista()
-
+    
+    def change_client(self): # Inicio da aula 11
+        self.variaveis()
+        self.connect_db()
+        self.cursor.execute("""
+            UPDATE
+                clientes
+            SET
+                nome_cliente = ?,
+                telefone = ?,
+                cidade = ?
+            WHERE
+                cod = ?;
+            """,(
+            self.nome_cliente,
+            self.telefone,
+            self.cidade,
+            self.codigo
+        ))
+        self.conn.commit()
+        self.disconnect_db()
+        self.select_lista()
+        self.limpa_tela()
+    
+    def search_client(self): ...
 class App(Funcs):# Inicio da aula 01
     def __init__(self) -> None:
         self.root = root
@@ -100,8 +124,9 @@ class App(Funcs):# Inicio da aula 01
         self.frames_tela()
         self.widgets_frame1()
         self.lista_frame2()
-        self.montar_Tabela()
+        self.create_table()
         self.select_lista()
+        self.menus()
         root.mainloop()
     
     def tela(self):
@@ -134,7 +159,8 @@ class App(Funcs):# Inicio da aula 01
         
         # Botão de Busca.
         self.bt_buscar = Button(self.frame_1, text='Buscar', bg='#2fabe9',
-                                bd=2, fg='white', font=('verdana',8,'bold'))
+                                bd=2, fg='white', font=('verdana',8,'bold'),
+                                command=self.search_client)
         self.bt_buscar.place(relx=0.32, rely=0.1, relwidth=0.1, relheight=0.169)
         
         # Botão Novo.
@@ -145,7 +171,8 @@ class App(Funcs):# Inicio da aula 01
         
         # Botão de Alterar.
         self.bt_alterar = Button(self.frame_1, text='Alterar', bg='#2fabe9',
-                                    bd=2, fg='white', font=('verdana',8,'bold'))
+                                    bd=2, fg='white', font=('verdana',8,'bold'),
+                                    command=self.change_client)
         self.bt_alterar.place(relx=0.71, rely=0.1, relwidth=0.1, relheight=0.169)
         
         # Botão de Apagar.
@@ -215,5 +242,20 @@ class App(Funcs):# Inicio da aula 01
         self.scrol_lista.place(relx=0.96, rely=0.05, relwidth=0.03, relheight=0.85)
         
         self.lista_clientes.bind("<Double-1>", self.OnDoubleClik)
+    
+    def menus(self): # Inicio da aula 12
+        menubar = Menu(self.root)
+        self.root.config(menu=menubar)
 
+        menu_opcoes = Menu(menubar)
+        menu_sobre= Menu(menubar)
+        
+        def Quit():
+            self.root.destroy()
+        
+        menubar.add_cascade(label='Opções', menu=menu_opcoes)
+        menubar.add_cascade(label='Sobre', menu=menu_sobre)
+        
+        menu_opcoes.add_command(label='Sair', command=Quit)
+        menu_sobre.add_command(label='Limpar tela', command=self.limpa_tela)
 App()
