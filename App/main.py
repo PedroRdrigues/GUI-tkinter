@@ -19,31 +19,31 @@ root = Tk()
 
 class Relatorios():
   def printClient(self):
-    if not path.exists("./Relatorios_clientes"):
-      mkdir("Relatorios_clientes")
-      
-      # realizar busca por nomes identicos de arquivos e substituir o antigo pelo novo
+    if not path.exists("./Relatorios"):
+      mkdir("Relatorios")
+    
+    # realizar busca por nomes identicos de arquivos e substituir o antigo pelo novo
     try:
       rename(
         f"cliente_{'_'.join(self.rel_nome.title().split())}.pdf",
-        f"Relatorios_clientes/cliente_{'_'.join(self.rel_nome.title().split())}.pdf"
+        f"Relatorios/cliente_{'_'.join(self.rel_nome.title().split())}.pdf"
       )
       print("\narquivo movido")
       
     except:
       remove(
-        f"Relatorios_clientes/cliente_{'_'.join(self.rel_nome.title().split())}.pdf"
+        f"Relatorios/cliente_{'_'.join(self.rel_nome.title().split())}.pdf"
         )
       print('\narquivo removido')
       
       rename(
         f"cliente_{'_'.join(self.rel_nome.title().split())}.pdf",
-        f"Relatorios_clientes/cliente_{'_'.join(self.rel_nome.title().split())}.pdf"
+        f"Relatorios/cliente_{'_'.join(self.rel_nome.title().split())}.pdf"
       )
       
     finally:
       webbrowser.open(
-        f"D:/17phr/Documents/PROGRAMACAO!/GitHub/GUI_tkinter/Relatorios_clientes/cliente_{'_'.join(self.rel_nome.title().split())}.pdf"
+        f"D:/17phr/Documents/PROGRAMACAO!/GitHub/GUI_tkinter/Relatorios/cliente_{'_'.join(self.rel_nome.title().split())}.pdf"
       )
       
       print("final\n")    
@@ -54,31 +54,40 @@ class Relatorios():
     self.rel_telefone = self.entry_telefone.get()
     self.rel_cidade = self.entry_cidade.get()
     
-    self.c = canvas.Canvas(f"cliente_{'_'.join(self.rel_nome.title().split())}.pdf",pagesize=A4)
+    # Se todos os dados do cliente não estiverem preenchidos, o relatório não irá ser criado.
+    rel_dados = [self.rel_codigo, self.rel_nome, self.rel_telefone, self.rel_cidade]
     
+    if rel_dados:
+      # Cria o aruqivo PDF com o prefixo "clente_" mais o nome do cliente e a extensão ".pdf" no tamanho de página "A4".
+      self.c = canvas.Canvas(f"cliente_{'_'.join(self.rel_nome.title().split())}.pdf",pagesize=A4)
+      
+      # Define a fonte como "Helvetica-Bold" com o tamanho 24 e escreve o titulo da página na posição desejada. 
+      self.c.setFont("Helvetica-Bold",24)
+      self.c.drawString(200, 790, "Ficha de Cliente")
+      
+      self.c.setFont("Helvetica-Bold",18)
+      self.c.drawString(50,720,"Código: ")
+      self.c.drawString(50,690,"Nome: ")
+      self.c.drawString(50,660,"Telefone: ")
+      self.c.drawString(50,630,"Cidade: ")
+      
+      # Define a fonte como "Helvetica-Bold" com o tamanho 18 e escreve o as informações do usuário ao lado da escrita anterior.
+      self.c.setFont("Helvetica",18)
+      self.c.drawString(150,720, self.rel_codigo)
+      self.c.drawString(150,690, self.rel_nome)
+      self.c.drawString(150,660, self.rel_telefone)
+      self.c.drawString(150,630, self.rel_cidade)
+      
+      # Cria uma linha que começa na possição x=20 com 555px de largura, no y=600 com 2px de altura e com preenchimento atívo.
+      self.c.rect(20, 600, 555, 2, fill=True)
+      
+      self.c.showPage()
+      self.c.save()
+      
+      # mover o arquivo do cliente para o diretório Relatorios.
+      self.printClient()
     
-    self.c.setFont("Helvetica-Bold",24)
-    self.c.drawString(200, 790, "Ficha de Cliente")
-    
-    self.c.setFont("Helvetica-Bold",18)
-    self.c.drawString(50,720,"Código: ")
-    self.c.drawString(50,690,"Nome: ")
-    self.c.drawString(50,660,"Telefone: ")
-    self.c.drawString(50,630,"Cidade: ")
-    
-    self.c.setFont("Helvetica",18)
-    self.c.drawString(150,720, self.rel_codigo)
-    self.c.drawString(150,690, self.rel_nome)
-    self.c.drawString(150,660, self.rel_telefone)
-    self.c.drawString(150,630, self.rel_cidade)
-    
-    self.c.rect(20, 600, 600, 5, fill=True, stroke=False)
-    
-    self.c.showPage()
-    self.c.save()
-    # mover o arquivo cliente.pdf para o diretório Relatorios_clientes
-    self.printClient()
-    
+    else: print("não foi possivel criar um relatório, pois o nome do cliente não existe!")
     
 class Funcs: # Inicio da aula 07
   def limpa_tela(self):
